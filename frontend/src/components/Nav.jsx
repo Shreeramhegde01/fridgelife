@@ -7,8 +7,16 @@ const NAV_ITEMS = [
   { key: 'heap', label: 'Heap' },
 ]
 
-export default function Nav({ activeTab, onTabChange }) {
+export default function Nav({ activeTab, onTabChange, onNewKitchen }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+
+  const handleNewKitchen = () => {
+    setShowMenu(false)
+    if (confirm('Start a fresh kitchen? Your current data will remain saved.')) {
+      onNewKitchen()
+    }
+  }
 
   return (
     <nav style={{
@@ -68,6 +76,80 @@ export default function Nav({ activeTab, onTabChange }) {
               {item.label}
             </button>
           ))}
+
+          {/* User / New Kitchen */}
+          <div style={{ position: 'relative', marginLeft: '8px' }}>
+            <button
+              id="user-menu-btn"
+              onClick={() => setShowMenu(!showMenu)}
+              style={{
+                background: 'none',
+                border: '1px solid rgba(255,255,255,0.25)',
+                borderRadius: '980px',
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '12px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                padding: '4px 14px',
+                fontFamily: 'inherit',
+                transition: 'border-color 0.2s ease, color 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'
+                e.currentTarget.style.color = 'white'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'
+                e.currentTarget.style.color = 'rgba(255,255,255,0.8)'
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              My Kitchen
+            </button>
+
+            {/* Dropdown */}
+            {showMenu && (
+              <div style={{
+                position: 'absolute',
+                top: 'calc(100% + 8px)',
+                right: 0,
+                background: 'var(--white)',
+                borderRadius: '12px',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+                border: '1px solid var(--border)',
+                minWidth: '180px',
+                overflow: 'hidden',
+                animation: 'fadeIn 0.15s ease',
+              }}>
+                <button
+                  onClick={handleNewKitchen}
+                  style={{
+                    width: '100%',
+                    background: 'none',
+                    border: 'none',
+                    padding: '12px 16px',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    color: 'var(--text-primary)',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontFamily: 'inherit',
+                    transition: 'background 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                >
+                  + New Kitchen
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Mobile hamburger */}
@@ -117,7 +199,38 @@ export default function Nav({ activeTab, onTabChange }) {
               {item.label}
             </button>
           ))}
+          <button
+            onClick={() => { setMenuOpen(false); handleNewKitchen() }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--accent)',
+              fontSize: '17px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              textAlign: 'left',
+              fontFamily: 'inherit',
+              padding: '4px 0',
+              marginTop: '8px',
+              borderTop: '1px solid rgba(255,255,255,0.15)',
+              paddingTop: '16px',
+            }}
+          >
+            + New Kitchen
+          </button>
         </div>
+      )}
+
+      {/* Click outside to close dropdown */}
+      {showMenu && (
+        <div
+          onClick={() => setShowMenu(false)}
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            zIndex: -1,
+          }}
+        />
       )}
 
       <style>{`

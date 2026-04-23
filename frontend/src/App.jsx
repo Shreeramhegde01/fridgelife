@@ -82,6 +82,23 @@ function App() {
     }, 150)
   }
 
+  const handleNewKitchen = async () => {
+    try {
+      localStorage.removeItem('fridgelife_household_id')
+      const res = await fetch(`${API}/households`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'My Home' }),
+      })
+      const data = await res.json()
+      localStorage.setItem('fridgelife_household_id', data.id)
+      setHouseholdId(data.id)
+      setActiveTab('fridge')
+    } catch (err) {
+      console.error('Failed to create new kitchen:', err)
+    }
+  }
+
   if (initializing) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -107,7 +124,7 @@ function App() {
 
   return (
     <div style={{ minHeight: '100vh' }}>
-      <Nav activeTab={activeTab} onTabChange={handleTabChange} />
+      <Nav activeTab={activeTab} onTabChange={handleTabChange} onNewKitchen={handleNewKitchen} />
 
       <main className="page-container" style={{ paddingBottom: '120px' }}>
         <div
