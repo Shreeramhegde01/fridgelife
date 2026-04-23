@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import RecipeCard from './RecipeCard'
 
 const API = '/api'
@@ -14,6 +14,9 @@ function daysRemaining(expiryDate) {
 export default function RecipeTab({ householdId }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const stripRef = useRef(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -31,6 +34,27 @@ export default function RecipeTab({ householdId }) {
     }
     fetchSuggestions()
   }, [])
+
+  // Check if scroll arrows are needed
+  const updateScrollState = () => {
+    const el = stripRef.current
+    if (!el) return
+    setCanScrollLeft(el.scrollLeft > 4)
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4)
+  }
+
+  useEffect(() => {
+    updateScrollState()
+    window.addEventListener('resize', updateScrollState)
+    return () => window.removeEventListener('resize', updateScrollState)
+  }, [data])
+
+  const scroll = (dir) => {
+    const el = stripRef.current
+    if (!el) return
+    el.scrollBy({ left: dir * 220, behavior: 'smooth' })
+    setTimeout(updateScrollState, 350)
+  }
 
   if (loading) {
     return (
@@ -72,16 +96,83 @@ export default function RecipeTab({ householdId }) {
         </p>
       </div>
 
-      {/* Expiring Strip */}
+      {/* Expiring Strip with scroll arrows */}
       {nearExpiryItems.length > 0 && (
-        <div style={{ marginBottom: '80px' }}>
-          <div style={{
-            display: 'flex',
-            gap: '12px',
-            overflowX: 'auto',
-            scrollbarWidth: 'none',
-            paddingBottom: '4px',
-          }}>
+        <div style={{ marginBottom: '80px', position: 'relative' }}>
+
+          {/* Left arrow */}
+          {canScrollLeft && (
+            <button
+              onClick={() => scroll(-1)}
+              style={{
+                position: 'absolute',
+                left: '-8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 2,
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                border: '1px solid var(--border)',
+                background: 'var(--white)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '16px',
+                color: 'var(--text-primary)',
+                transition: 'box-shadow 0.15s ease',
+              }}
+              aria-label="Scroll left"
+            >
+              ‹
+            </button>
+          )}
+
+          {/* Right arrow */}
+          {canScrollRight && (
+            <button
+              onClick={() => scroll(1)}
+              style={{
+                position: 'absolute',
+                right: '-8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 2,
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                border: '1px solid var(--border)',
+                background: 'var(--white)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '16px',
+                color: 'var(--text-primary)',
+                transition: 'box-shadow 0.15s ease',
+              }}
+              aria-label="Scroll right"
+            >
+              ›
+            </button>
+          )}
+
+          {/* Scrollable strip */}
+          <div
+            ref={stripRef}
+            onScroll={updateScrollState}
+            style={{
+              display: 'flex',
+              gap: '12px',
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+              paddingBottom: '4px',
+              padding: '0 4px',
+            }}
+          >
             {nearExpiryItems.map((item, idx) => {
               const days = daysRemaining(item.expiry_date)
               return (
@@ -139,6 +230,9 @@ export default function RecipeTab({ householdId }) {
         <div style={{ textAlign: 'center', padding: '80px 0' }}>
           <p style={{ fontSize: '17px', color: 'var(--text-secondary)' }}>
             No matching recipes found for your expiring items.
+          </p>
+          <p style={{ fontSize: '13px', color: 'var(--text-tertiary)', marginTop: '8px' }}>
+            The recipe database has 10 common Indian dishes. Items like these don't match any recipe.
           </p>
         </div>
       ) : (
