@@ -1,0 +1,21 @@
+{
+  "name": "fridgelife-backend",
+  "version": "1.0.0",
+  "description": "FridgeLife backend — food expiry tracker API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "seed": "node seed.js",
+    "dev": "node index.js",
+    "build": "cd ../frontend && npm install && npm run build"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "pg": "^8.13.0"
+  }
+}

@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: fridgelife
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: node index.js
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: NODE_ENV
+        value: production
