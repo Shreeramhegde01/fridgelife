@@ -46,7 +46,7 @@ export default function Nav({ activeTab, onTabChange, onNewKitchen }) {
           letterSpacing: '-0.01em',
           cursor: 'default',
         }}>
-          🥦 FridgeLife
+           FridgeLife
         </span>
 
         {/* Desktop nav items */}
