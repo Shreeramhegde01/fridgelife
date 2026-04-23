@@ -13,7 +13,7 @@ export default function Nav({ activeTab, onTabChange, onNewKitchen }) {
 
   const handleNewKitchen = () => {
     setShowMenu(false)
-    if (confirm('Start a fresh kitchen? Your current data will remain saved.')) {
+    if (confirm('Start a fresh kitchen? Your current items and waste history will be permanently deleted.')) {
       onNewKitchen()
     }
   }

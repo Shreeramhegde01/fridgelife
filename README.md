@@ -189,6 +189,7 @@ Each visitor is automatically assigned an isolated **household**:
 3. The household ID is stored in `localStorage`
 4. All API calls include an `x-household-id` header
 5. Data is fully isolated — users only see their own items, recipes, and waste reports
+6. Clicking **"My Kitchen" → "+ New Kitchen"** in the nav deletes the current household's data and creates a fresh one
 
 ---
 
@@ -197,6 +198,7 @@ Each visitor is automatically assigned an isolated **household**:
 | Method | Endpoint              | Description                              |
 |--------|----------------------|------------------------------------------|
 | POST   | /api/households       | Create a new household (auto-seeded)     |
+| DELETE | /api/households/:id   | Delete household and all its data        |
 | GET    | /api/items            | All active items (sorted by expiry)      |
 | GET    | /api/items/expiring   | Items expiring within 3 days             |
 | POST   | /api/items            | Add new item                             |

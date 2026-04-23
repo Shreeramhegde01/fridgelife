@@ -101,6 +101,34 @@ app.post('/api/households', async (req, res) => {
   }
 });
 
+// DELETE /api/households/:id — delete a household and all its data
+app.delete('/api/households/:id', async (req, res) => {
+  const householdId = parseInt(req.params.id);
+  if (!householdId || isNaN(householdId)) {
+    return res.status(400).json({ error: 'Invalid household ID' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(`DELETE FROM waste_log WHERE household_id = $1`, [householdId]);
+    await client.query(`DELETE FROM items WHERE household_id = $1`, [householdId]);
+    await client.query(`DELETE FROM households WHERE id = $1`, [householdId]);
+    await client.query('COMMIT');
+
+    // Remove heap from memory
+    heapStore.delete(householdId);
+
+    res.json({ message: 'Household deleted' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('DELETE /api/households error:', err.message);
+    res.status(500).json({ error: 'Failed to delete household' });
+  } finally {
+    client.release();
+  }
+});
+
 // GET /api/heap — current heap state (requires household)
 app.get('/api/heap', requireHousehold, (req, res) => {
   const heap = getHeap(req.householdId);

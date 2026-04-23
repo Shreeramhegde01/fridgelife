@@ -84,6 +84,12 @@ function App() {
 
   const handleNewKitchen = async () => {
     try {
+      // Delete the old household and all its data from the database
+      if (householdId) {
+        await fetch(`${API}/households/${householdId}`, { method: 'DELETE' })
+      }
+
+      // Create a fresh household
       localStorage.removeItem('fridgelife_household_id')
       const res = await fetch(`${API}/households`, {
         method: 'POST',
