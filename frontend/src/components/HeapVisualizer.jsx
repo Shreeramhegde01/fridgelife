@@ -2,14 +2,16 @@ import { useState, useEffect, useCallback } from 'react'
 
 const API = '/api'
 
-export default function HeapVisualizer() {
+export default function HeapVisualizer({ householdId }) {
   const [heapData, setHeapData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
 
   const fetchHeap = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/heap`)
+      const res = await fetch(`${API}/heap`, {
+        headers: { 'x-household-id': String(householdId) },
+      })
       setHeapData(await res.json())
     } catch (err) {
       console.error(err)

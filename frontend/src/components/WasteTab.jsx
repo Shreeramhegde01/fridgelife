@@ -13,7 +13,7 @@ function getMonthName() {
   return new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })
 }
 
-export default function WasteTab() {
+export default function WasteTab({ householdId }) {
   const [report, setReport] = useState(null)
   const [shopping, setShopping] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -22,9 +22,10 @@ export default function WasteTab() {
     const fetchData = async () => {
       setLoading(true)
       try {
+        const headers = { 'x-household-id': String(householdId) }
         const [r, s] = await Promise.all([
-          fetch(`${API}/waste/report`),
-          fetch(`${API}/waste/shopping`),
+          fetch(`${API}/waste/report`, { headers }),
+          fetch(`${API}/waste/shopping`, { headers }),
         ])
         setReport(await r.json())
         setShopping(await s.json())

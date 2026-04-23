@@ -8,16 +8,58 @@ import HeapVisualizer from './components/HeapVisualizer'
 
 const API = '/api'
 
+// ─── Household management ─────────────────────────────
+async function getOrCreateHouseholdId() {
+  const stored = localStorage.getItem('fridgelife_household_id')
+  if (stored) return parseInt(stored)
+
+  // First visit — create a new household
+  const res = await fetch(`${API}/households`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: 'My Home' }),
+  })
+  const data = await res.json()
+  localStorage.setItem('fridgelife_household_id', data.id)
+  return data.id
+}
+
+// Helper to add household header to all API calls
+function apiFetch(url, householdId, options = {}) {
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      'Content-Type': 'application/json',
+      'x-household-id': String(householdId),
+    },
+  })
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState('fridge')
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [transitioning, setTransitioning] = useState(false)
+  const [householdId, setHouseholdId] = useState(null)
+  const [initializing, setInitializing] = useState(true)
+
+  // Initialize household
+  useEffect(() => {
+    getOrCreateHouseholdId().then((id) => {
+      setHouseholdId(id)
+      setInitializing(false)
+    }).catch((err) => {
+      console.error('Failed to initialize household:', err)
+      setInitializing(false)
+    })
+  }, [])
 
   const fetchItems = useCallback(async () => {
+    if (!householdId) return
     setLoading(true)
     try {
-      const res = await fetch(`${API}/items`)
+      const res = await apiFetch(`${API}/items`, householdId)
       const data = await res.json()
       setItems(data)
     } catch (err) {
@@ -25,11 +67,11 @@ function App() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [householdId])
 
   useEffect(() => {
-    fetchItems()
-  }, [fetchItems])
+    if (householdId) fetchItems()
+  }, [householdId, fetchItems])
 
   const handleTabChange = (tab) => {
     if (tab === activeTab) return
@@ -40,16 +82,24 @@ function App() {
     }, 150)
   }
 
+  if (initializing) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ fontSize: '17px', color: 'var(--text-secondary)' }}>Setting up your kitchen…</p>
+      </div>
+    )
+  }
+
   const renderTab = () => {
     switch (activeTab) {
       case 'fridge':
-        return <FridgeTab items={items} loading={loading} onRefresh={fetchItems} />
+        return <FridgeTab items={items} loading={loading} onRefresh={fetchItems} householdId={householdId} />
       case 'recipes':
-        return <RecipeTab />
+        return <RecipeTab householdId={householdId} />
       case 'waste':
-        return <WasteTab />
+        return <WasteTab householdId={householdId} />
       case 'heap':
-        return <HeapVisualizer />
+        return <HeapVisualizer householdId={householdId} />
       default:
         return null
     }

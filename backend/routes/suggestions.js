@@ -4,15 +4,16 @@ const router = express.Router();
 const pool = require('../db');
 const matchRecipes = require('../matcher');
 
-let heap;
-function setHeap(h) {
-  heap = h;
+let heapStore;
+function setHeapStore(store) {
+  heapStore = store;
 }
 
 // ─── GET /api/suggestions — top 3 recipe suggestions ─────────────
 router.get('/', async (req, res) => {
   try {
-    // 1. Get near-expiry item names from heap (within 3 days)
+    // 1. Get near-expiry item names from this household's heap (within 3 days)
+    const heap = heapStore.getHeap(req.householdId);
     const nearExpiry = heap.getExpiringWithin(3);
     const nearExpiryNames = nearExpiry.map((item) => item.name);
 
@@ -49,4 +50,4 @@ router.get('/', async (req, res) => {
   }
 });
 
-module.exports = { router, setHeap };
+module.exports = { router, setHeapStore };

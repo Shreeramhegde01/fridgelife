@@ -11,7 +11,7 @@ function daysRemaining(expiryDate) {
   return Math.ceil((exp - now) / (1000 * 60 * 60 * 24))
 }
 
-export default function RecipeTab() {
+export default function RecipeTab({ householdId }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -19,7 +19,9 @@ export default function RecipeTab() {
     const fetchSuggestions = async () => {
       setLoading(true)
       try {
-        const res = await fetch(`${API}/suggestions`)
+        const res = await fetch(`${API}/suggestions`, {
+          headers: { 'x-household-id': String(householdId) },
+        })
         setData(await res.json())
       } catch (err) {
         console.error(err)

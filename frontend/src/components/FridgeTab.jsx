@@ -12,7 +12,8 @@ function daysRemaining(expiryDate) {
   return Math.ceil((exp - now) / (1000 * 60 * 60 * 24))
 }
 
-export default function FridgeTab({ items, loading, onRefresh }) {
+export default function FridgeTab({ items, loading, onRefresh, householdId }) {
+  const headers = { 'Content-Type': 'application/json', 'x-household-id': String(householdId) }
   const [showForm, setShowForm] = useState(false)
   const [actionLoading, setActionLoading] = useState(null)
 
@@ -38,7 +39,7 @@ export default function FridgeTab({ items, loading, onRefresh }) {
     try {
       const res = await fetch(`${API}/items`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(formData),
       })
       if (res.ok) {
@@ -53,7 +54,7 @@ export default function FridgeTab({ items, loading, onRefresh }) {
   const markUsed = async (id) => {
     setActionLoading(id)
     try {
-      await fetch(`${API}/items/${id}/used`, { method: 'POST' })
+      await fetch(`${API}/items/${id}/used`, { method: 'POST', headers })
       onRefresh()
     } catch (err) {
       console.error(err)
@@ -65,7 +66,7 @@ export default function FridgeTab({ items, loading, onRefresh }) {
   const markWasted = async (id) => {
     setActionLoading(id)
     try {
-      await fetch(`${API}/items/${id}/wasted`, { method: 'POST' })
+      await fetch(`${API}/items/${id}/wasted`, { method: 'POST', headers })
       onRefresh()
     } catch (err) {
       console.error(err)
